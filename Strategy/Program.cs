@@ -25,8 +25,7 @@ namespace Strategy
             };
 
             IStrategy strategy = new HappyHoursStrategy(
-                TimeSpan.FromHours(9),
-                TimeSpan.FromHours(16),
+                new Range<TimeSpan>(TimeSpan.FromHours(9), TimeSpan.FromHours(16)),
                 10);
 
             VisitCalculator visitCalculator = new VisitCalculator(strategy);
@@ -43,23 +42,42 @@ namespace Strategy
         decimal Discount(Visit visit);
     }
 
+    struct Range<T>
+        where T : struct
+    {
+        public Range(T from, T to) 
+        {
+            From = from;
+            To = to;
+        }
+
+        public T From { get; set; }
+        public T To { get; set; }
+
+        //public bool IsBetween(T value)
+        //{
+        //    return value >= From && value <= To;
+        //}
+    }
+
     class HappyHoursStrategy : IStrategy
     {
-        private readonly TimeSpan from;
-        private readonly TimeSpan to;
+        // private readonly TimeSpan from;
+        // private readonly TimeSpan to;
+
+        private readonly Range<TimeSpan> period;
         private readonly decimal discount;
 
-        public HappyHoursStrategy(TimeSpan from, TimeSpan to, decimal discount)
+        public HappyHoursStrategy(Range<TimeSpan> period, decimal discount)
         {
-            this.from = from;
-            this.to = to;
+            this.period = period;
             this.discount = discount;
         }
 
         public bool CanDiscount(Visit visit)
         {
-            return visit.VisitDate.TimeOfDay >= from
-               && visit.VisitDate.TimeOfDay <= to;
+            return visit.VisitDate.TimeOfDay >= period.From
+               && visit.VisitDate.TimeOfDay <= period.To;
         }
 
         public decimal Discount(Visit visit)
