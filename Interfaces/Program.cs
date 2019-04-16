@@ -24,6 +24,13 @@ namespace Interfaces
         private static void DisplaysCustomers()
         {
             ICustomersService customersService = new FakerCustomersService(new CustomerFaker());
+
+            var customers = customersService.Get();
+
+            foreach (var customer in customers)
+            {
+                Console.WriteLine($"{customer.Id} {customer.Name}");
+            }
         }
 
         private static void DisplaysPersons()
