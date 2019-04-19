@@ -30,14 +30,10 @@ namespace Decorator
             ICanDiscountStrategy canDiscountStrategy = new HappyHoursCanDiscountStrategy(period);
             IDiscountStrategy discountStrategy = new FixedDiscountStrategy(20);
 
-
             IVisitCalculator visitCalculator
-                = new DiscountDecorator(
-                                new HappyHoursCanDiscountStrategy(period),
-                                new FixedDiscountStrategy(20),                         
-                                    new DiscountDecorator(new GenderCanDiscountStrategy(Gender.Female),
-                                        new PercentageDiscountStrategy(0.1m), 
-                                        new VisitCalculator()));
+                = new HappyHoursFixedDecorator(
+                    new GenderPercentageDecorator(
+                        new VisitCalculator(), Gender.Female, 0.1m), TimeSpan.FromHours(8.5), TimeSpan.FromHours(16), 20);
             
             decimal totalAmount = visitCalculator.Calculate(visit);
 
@@ -112,6 +108,21 @@ namespace Decorator
         public decimal Discount(Visit visit) => visit.Amount * percentage;
     }
 
+    public class HappyHoursFixedDecorator : DiscountDecorator
+    {
+        public HappyHoursFixedDecorator(IVisitCalculator calculator, TimeSpan from, TimeSpan to, decimal discount) 
+            : base(calculator, new HappyHoursCanDiscountStrategy(new Range<TimeSpan>(from, to)), new FixedDiscountStrategy(discount))
+        {
+        }
+    }
+
+    public class GenderPercentageDecorator : DiscountDecorator
+    {
+        public GenderPercentageDecorator(IVisitCalculator calculator, Gender gender, decimal percentage) 
+            : base(calculator, new GenderCanDiscountStrategy(gender), new PercentageDiscountStrategy(percentage))
+        {
+        }
+    }
 
     public class DiscountDecorator : IVisitCalculator
     {
@@ -119,7 +130,7 @@ namespace Decorator
         private readonly ICanDiscountStrategy canDiscountStrategy;
         private readonly IDiscountStrategy discountStrategy;
 
-        public DiscountDecorator(ICanDiscountStrategy canDiscountStrategy, IDiscountStrategy discountStrategy, IVisitCalculator calculator)
+        public DiscountDecorator(IVisitCalculator calculator, ICanDiscountStrategy canDiscountStrategy, IDiscountStrategy discountStrategy)
         {
             this.calculator = calculator;
             this.canDiscountStrategy = canDiscountStrategy;
