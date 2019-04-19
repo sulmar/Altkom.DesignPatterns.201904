@@ -36,7 +36,7 @@ namespace Decorator
                                 new HappyHoursCanDiscountStrategy(period),
                                 new FixedDiscountStrategy(20),                         
                                     new DiscountDecorator(new GenderCanDiscountStrategy(Gender.Female),
-                                        new PercentageDiscountStrategy(0.5m), 
+                                        new PercentageDiscountStrategy(0.1m), 
                                         new VisitCalculator()));
             
             decimal totalAmount = visitCalculator.Calculate(visit);
@@ -98,30 +98,18 @@ namespace Decorator
     {
         private readonly decimal discount;
 
-        public FixedDiscountStrategy(decimal discount)
-        {
-            this.discount = discount;
-        }
+        public FixedDiscountStrategy(decimal discount) => this.discount = discount;
 
-        public decimal Discount(Visit visit)
-        {
-            return visit.Amount - discount;
-        }
+        public decimal Discount(Visit visit) => discount;
     }
 
     public class PercentageDiscountStrategy : IDiscountStrategy
     {
         private readonly decimal percentage;
 
-        public PercentageDiscountStrategy(decimal percentage)
-        {
-            this.percentage = percentage;
-        }
+        public PercentageDiscountStrategy(decimal percentage) => this.percentage = percentage;
 
-        public decimal Discount(Visit visit)
-        {
-            return visit.Amount * percentage;
-        }
+        public decimal Discount(Visit visit) => visit.Amount * percentage;
     }
 
 
